@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Frogger Classic Return 2026 - Zoro 2</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; display: flex; justify-content: center; align-items: center; }
+        #status { color: #00FF00; font-family: monospace; text-align: center; font-size: 18px; }
+        iframe { width: 100%; height: 100%; border: none; display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="status">جاري تحضير اللعبة يا زورو 2...</div>
+    <iframe id="gameFrame"></iframe>
+
+    <script>
+        // الرابط المباشر للملف الذي رفعته
+        const ZIP_URL = 'https://raw.githubusercontent.com/ubu-creator/Frogger-Classic-Return2026/main/frogger.zip';
+
+        async function launchGame() {
+            const status = document.getElementById('status');
+            const frame = document.getElementById('gameFrame');
+
+            try {
+                const response = await fetch(ZIP_URL);
+                if (!response.ok) throw new Error("تعذر الوصول للملف");
+                
+                const blob = await response.blob();
+                const zip = await JSZip.loadAsync(blob);
+                
+                // البحث عن ملف التشغيل داخل الزيب
+                const htmlFile = zip.file("index.html") || Object.values(zip.files).find(f => f.name.endsWith('.html'));
+
+                if (htmlFile) {
+                    const content = await htmlFile.async("string");
+                    const blobUrl = URL.createObjectURL(new Blob([content], {type: 'text/html'}));
+                    
+                    status.style.display = 'none';
+                    frame.style.display = 'block';
+                    frame.src = blobUrl;
+                } else {
+                    status.innerText = "خطأ: ملف index.html غير موجود داخل الزيب";
+                }
+            } catch (err) {
+                status.innerText = "حدث خطأ في التحميل، تأكد من إعدادات GitHub Pages";
+                console.error(err);
+            }
+        }
+
+        launchGame();
+    </script>
+</body>
+</html>
