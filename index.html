@@ -3,63 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Frogger Return 2026 - Zoro 2</title>
+    <title>Frogger Pro - Zoro 2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #status { color: #00FF00; font-family: monospace; text-align: center; padding: 20px; font-size: 18px; }
-        iframe { width: 100%; height: 100%; border: none; display: none; background: #000; }
+        body { margin: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        canvas { background: #004400; border: 2px solid #333; max-width: 95vw; max-height: 60vh; }
+        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .btn { background: #333; color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 24px; user-select: none; border: 1px solid #555; }
     </style>
 </head>
 <body>
 
-    <div id="status">جاري الاتصال بملف frogger1.zip...</div>
-    <iframe id="gameFrame"></iframe>
+<canvas id="gameCanvas" width="400" height="480"></canvas>
 
-    <script>
-        // الرابط الذي طلبته بعد تحويله لرابط تحميل مباشر (Raw)
-        const ZIP_URL = 'https://raw.githubusercontent.com/ubu-creator/Frogger-Classic-Return2026/main/frogger1.zip';
+<div class="controls">
+    <div style="grid-column:2" class="btn" onclick="move('up')">↑</div>
+    <div style="grid-column:1" class="btn" onclick="move('left')">←</div>
+    <div style="grid-column:3" class="btn" onclick="move('right')">→</div>
+    <div style="grid-column:2" class="btn" onclick="move('down')">↓</div>
+</div>
 
-        async function loadGame() {
-            const status = document.getElementById('status');
-            const frame = document.getElementById('gameFrame');
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const grid = 40;
+    const ZIP_URL = 'https://raw.githubusercontent.com/ubu-creator/Frogger-Classic-Return2026/main/frogger1.zip';
 
-            try {
-                const response = await fetch(ZIP_URL);
-                if (!response.ok) throw new Error("لم أتمكن من سحب الملف من GitHub");
-                
-                const blob = await response.blob();
-                const zip = await JSZip.loadAsync(blob);
-                
-                // البحث عن ملف index.html داخل الزيب
-                let targetFile = null;
-                for (let path in zip.files) {
-                    if (path.toLowerCase().endsWith('index.html')) {
-                        targetFile = zip.files[path];
-                        break;
-                    }
+    let frog = { x: grid * 4, y: grid * 10, w: 35, h: 35 };
+    let images = {};
+
+    async function loadImagesFromZip() {
+        try {
+            const res = await fetch(ZIP_URL);
+            const zip = await JSZip.loadAsync(await res.blob());
+            for (let name in zip.files) {
+                if (name.toLowerCase().endsWith('.png')) {
+                    const blob = await zip.files[name].async("blob");
+                    const img = new Image();
+                    img.src = URL.createObjectURL(blob);
+                    // نخزن الصور بأسماء بسيطة مثل frog.png
+                    images[name.split('/').pop().toLowerCase()] = img;
                 }
-
-                if (targetFile) {
-                    const content = await targetFile.async("string");
-                    // معالجة المسارات لتعمل الصور PNG الموجودة داخل الزيب
-                    const dirPath = targetFile.name.substring(0, targetFile.name.lastIndexOf("/") + 1);
-                    const finalCode = content.replace('<head>', `<head><base href="${dirPath}">`);
-                    
-                    const blobUrl = URL.createObjectURL(new Blob([finalCode], {type: 'text/html'}));
-                    status.style.display = 'none';
-                    frame.style.display = 'block';
-                    frame.src = blobUrl;
-                } else {
-                    status.innerText = "تنبيه: الملف zip لا يحتوي على index.html داخلي";
-                }
-            } catch (err) {
-                status.innerText = "خطأ: تأكد من أن الملف frogger1.zip موجود في GitHub";
-                console.error(err);
             }
+            draw();
+        } catch (e) { console.error("Error loading images"); draw(); }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // رسم الخلفية
+        ctx.fillStyle = "#0000AA"; ctx.fillRect(0, 0, canvas.width, grid * 5); // ماء
+        ctx.fillStyle = "#222"; ctx.fillRect(0, grid * 5, canvas.width, grid * 5); // طريق
+
+        // رسم الضفدع بالصورة المستخرجة
+        const fImg = images['frog.png'] || images['player.png'] || images['frogger.png'];
+        if (fImg) {
+            ctx.drawImage(fImg, frog.x, frog.y, frog.w, frog.h);
+        } else {
+            // شكل احتياطي إذا لم يجد الصورة
+            ctx.fillStyle = "lime"; ctx.fillRect(frog.x, frog.y, frog.w, frog.h);
         }
 
-        loadGame();
-    </script>
+        requestAnimationFrame(draw);
+    }
+
+    function move(d) {
+        if (d === 'up' && frog.y > 0) frog.y -= grid;
+        if (d === 'down' && frog.y < canvas.height - grid) frog.y += grid;
+        if (d === 'left' && frog.x > 0) frog.x -= grid;
+        if (d === 'right' && frog.x < canvas.width - grid) frog.x += grid;
+    }
+
+    loadImagesFromZip();
+</script>
 </body>
 </html>
