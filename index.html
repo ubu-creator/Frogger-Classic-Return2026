@@ -3,79 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Frogger Pro - Zoro 2</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <title>Frogger Pro Edition - Zoro 2</title>
     <style>
-        body { margin: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        canvas { background: #004400; border: 2px solid #333; max-width: 95vw; max-height: 60vh; }
-        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
-        .btn { background: #333; color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 24px; user-select: none; border: 1px solid #555; }
+        body { margin: 0; background: #000; color: #0f0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; font-family: 'Courier New', monospace; }
+        canvas { background: #000; border: 4px solid #555; max-width: 95vw; max-height: 60vh; image-rendering: pixelated; }
+        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .btn { background: #222; border: 2px solid #444; color: white; padding: 20px; border-radius: 12px; text-align: center; font-size: 25px; user-select: none; }
+        .btn:active { background: #0f0; color: #000; }
     </style>
 </head>
 <body>
 
-<canvas id="gameCanvas" width="400" height="480"></canvas>
+<div style="margin-bottom: 5px;">النقاط: <span id="sc">0</span></div>
+<canvas id="g" width="400" height="520"></canvas>
 
 <div class="controls">
-    <div style="grid-column:2" class="btn" onclick="move('up')">↑</div>
-    <div style="grid-column:1" class="btn" onclick="move('left')">←</div>
-    <div style="grid-column:3" class="btn" onclick="move('right')">→</div>
-    <div style="grid-column:2" class="btn" onclick="move('down')">↓</div>
+    <div style="grid-column:2" class="btn" onclick="m('u')">↑</div>
+    <div style="grid-column:1" class="btn" onclick="m('l')">←</div>
+    <div style="grid-column:3" class="btn" onclick="m('r')">→</div>
+    <div style="grid-column:2" class="btn" onclick="m('d')">↓</div>
 </div>
 
 <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const grid = 40;
-    const ZIP_URL = 'https://raw.githubusercontent.com/ubu-creator/Frogger-Classic-Return2026/main/frogger1.zip';
+    const cvs = document.getElementById("g"), ctx = cvs.getContext("2d");
+    const unit = 40; let score = 0;
+    let frog = { x: unit * 4, y: unit * 12, w: 30, h: 30 };
 
-    let frog = { x: grid * 4, y: grid * 10, w: 35, h: 35 };
-    let images = {};
-
-    async function loadImagesFromZip() {
-        try {
-            const res = await fetch(ZIP_URL);
-            const zip = await JSZip.loadAsync(await res.blob());
-            for (let name in zip.files) {
-                if (name.toLowerCase().endsWith('.png')) {
-                    const blob = await zip.files[name].async("blob");
-                    const img = new Image();
-                    img.src = URL.createObjectURL(blob);
-                    // نخزن الصور بأسماء بسيطة مثل frog.png
-                    images[name.split('/').pop().toLowerCase()] = img;
-                }
-            }
-            draw();
-        } catch (e) { console.error("Error loading images"); draw(); }
-    }
+    // عوائق متوازنة إحصائياً (سيارات وأخشاب)
+    const objs = [
+        { x: 0, y: unit*1, w: 120, s: 2.2, c: '#8B4513', t: 'l' },
+        { x: 200, y: unit*2, w: 80, s: -1.5, c: '#A0522D', t: 'l' },
+        { x: 100, y: unit*4, w: 150, s: 1.8, c: '#CD853F', t: 'l' },
+        { x: 0, y: unit*7, w: 50, s: 3.5, c: '#FF0000', t: 'c' },
+        { x: 150, y: unit*8, w: 50, s: -2.5, c: '#FFFF00', t: 'c' },
+        { x: 300, y: unit*10, w: 50, s: 4, c: '#00FFFF', t: 'c' }
+    ];
 
     function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#000033"; ctx.fillRect(0, 0, 400, 520); // خلفية
+        ctx.fillStyle = "#0000AA"; ctx.fillRect(0, 0, 400, unit*6); // ماء
+        ctx.fillStyle = "#111"; ctx.fillRect(0, unit*6, 400, unit*6); // طريق
+
+        let safe = false;
+        objs.forEach(o => {
+            o.x += o.s;
+            if(o.x > 400) o.x = -o.w; if(o.x < -o.w) o.x = 400;
+            
+            ctx.fillStyle = o.c;
+            ctx.fillRect(o.x, o.y + 5, o.w, unit - 10);
+            
+            // إضافة تفاصيل بسيطة (شبابيك للسيارات أو خطوط للخشب)
+            ctx.fillStyle = "rgba(255,255,255,0.3)";
+            ctx.fillRect(o.x + 5, o.y + 10, 10, 20);
+
+            if(rectCol(frog, o)) {
+                if(o.t === 'c') reset();
+                else { safe = true; frog.x += o.s; }
+            }
+        });
+
+        if(frog.y < unit*6 && frog.y > 0 && !safe) reset();
+
+        // رسم الضفدع باحترافية (بدون صور مفقودة)
+        ctx.fillStyle = "#32CD32";
+        ctx.beginPath(); ctx.arc(frog.x+15, frog.y+15, 15, 0, 7); ctx.fill();
+        ctx.fillStyle = "white"; ctx.fillRect(frog.x+5, frog.y+5, 6, 6); ctx.fillRect(frog.x+20, frog.y+5, 6, 6);
         
-        // رسم الخلفية
-        ctx.fillStyle = "#0000AA"; ctx.fillRect(0, 0, canvas.width, grid * 5); // ماء
-        ctx.fillStyle = "#222"; ctx.fillRect(0, grid * 5, canvas.width, grid * 5); // طريق
-
-        // رسم الضفدع بالصورة المستخرجة
-        const fImg = images['frog.png'] || images['player.png'] || images['frogger.png'];
-        if (fImg) {
-            ctx.drawImage(fImg, frog.x, frog.y, frog.w, frog.h);
-        } else {
-            // شكل احتياطي إذا لم يجد الصورة
-            ctx.fillStyle = "lime"; ctx.fillRect(frog.x, frog.y, frog.w, frog.h);
-        }
-
         requestAnimationFrame(draw);
     }
 
-    function move(d) {
-        if (d === 'up' && frog.y > 0) frog.y -= grid;
-        if (d === 'down' && frog.y < canvas.height - grid) frog.y += grid;
-        if (d === 'left' && frog.x > 0) frog.x -= grid;
-        if (d === 'right' && frog.x < canvas.width - grid) frog.x += grid;
+    function rectCol(a, b) {
+        return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + unit && a.y + a.h > b.y;
     }
 
-    loadImagesFromZip();
+    function reset() { frog.x = unit*4; frog.y = unit*12; score = 0; document.getElementById('sc').innerText = score; }
+
+    function m(d) {
+        if(d=='u' && frog.y > 0) { frog.y -= unit; score += 10; }
+        if(d=='d' && frog.y < 480) frog.y += unit;
+        if(d=='l' && frog.x > 0) frog.x -= unit;
+        if(d=='r' && frog.x < 360) frog.x += unit;
+        document.getElementById('sc').innerText = score;
+        if(frog.y <= 0) { alert("عاش يا زورو 2! بطل!"); reset(); }
+    }
+    draw();
 </script>
 </body>
 </html>
