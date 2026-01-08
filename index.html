@@ -3,124 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Frogger Classic Return - Zoro 2</title>
+    <title>Frogger Classic - Zoro 2</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        body { margin: 0; background: #000; color: #fff; font-family: Arial, sans-serif; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
-        canvas { background: #111; border: 2px solid #555; max-width: 95vw; max-height: 70vh; touch-action: none; }
-        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; width: 240px; }
-        .btn { background: #333; border: 1px solid #777; color: #fff; padding: 20px; text-align: center; border-radius: 10px; user-select: none; -webkit-tap-highlight-color: transparent; font-weight: bold; }
-        .btn:active { background: #555; }
-        .up { grid-column: 2; }
-        .left { grid-column: 1; }
-        .right { grid-column: 3; }
-        .down { grid-column: 2; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #status { color: #00FF00; font-family: monospace; text-align: center; padding: 20px; }
+        iframe { width: 100%; height: 100%; border: none; display: none; background: white; }
     </style>
 </head>
 <body>
 
-<canvas id="froggerCanvas" width="400" height="400"></canvas>
+    <div id="status">جاري تشغيل Frogger...</div>
+    <iframe id="gameFrame"></iframe>
 
-<div class="controls">
-    <div class="btn up" id="upBtn">↑</div>
-    <div class="btn left" id="leftBtn">←</div>
-    <div class="btn right" id="rightBtn">→</div>
-    <div class="btn down" id="downBtn">↓</div>
-</div>
+    <script>
+        // الرابط المصحح بدون مسافات
+        const ZIP_URL = 'https://raw.githubusercontent.com/ubu-creator/Frogger-Classic-Return2026/main/frogger.zip';
 
-<script>
-    const canvas = document.getElementById("froggerCanvas");
-    const ctx = canvas.getContext("2d");
-    const grid = 40;
+        async function startEngine() {
+            const status = document.getElementById('status');
+            const frame = document.getElementById('gameFrame');
 
-    let frog = { x: grid * 4, y: grid * 9, w: grid - 5, h: grid - 5 };
-    let score = 0;
-    let obstacles = [];
-
-    // التوازن الإحصائي للسرعات والصفوف
-    function initObstacles() {
-        obstacles = [];
-        for (let i = 1; i < 9; i++) {
-            if (i === 5) continue; // منطقة أمان وسطى
-            obstacles.push({
-                x: Math.random() * canvas.width,
-                y: grid * i,
-                w: grid * (Math.random() * 1.5 + 1),
-                h: grid - 10,
-                speed: (Math.random() * 1.5 + 1) * (i % 2 === 0 ? 1 : -1),
-                type: i < 5 ? "water" : "road"
-            });
-        }
-    }
-
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // رسم البيئة
-        ctx.fillStyle = "#006400"; ctx.fillRect(0, grid * 9, canvas.width, grid); // البداية
-        ctx.fillStyle = "#0000FF"; ctx.fillRect(0, 0, canvas.width, grid * 5);    // الماء
-        ctx.fillStyle = "#333";    ctx.fillRect(0, grid * 5, canvas.width, grid * 4); // الطريق
-
-        // رسم الضفدع
-        ctx.fillStyle = "#00FF00";
-        ctx.fillRect(frog.x, frog.y, frog.w, frog.h);
-
-        // تحريك ورسم العقبات
-        obstacles.forEach(obs => {
-            obs.x += obs.speed;
-            if (obs.x > canvas.width) obs.x = -obs.w;
-            if (obs.x < -obs.w) obs.x = canvas.width;
-
-            ctx.fillStyle = obs.type === "water" ? "#8B4513" : "#FF0000";
-            ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
-
-            // كشف التصادم (التوازن الاستراتيجي)
-            if (frog.x < obs.x + obs.w && frog.x + frog.w > obs.x &&
-                frog.y < obs.y + obs.h && frog.y + frog.h > obs.y) {
-                if (obs.type === "road") resetGame();
-            }
-        });
-
-        // قاعدة منطقة الماء (إذا كان في الماء وليس فوق خشب يغرق)
-        if (frog.y < grid * 5 && frog.y > 0) {
-            let onLog = false;
-            obstacles.forEach(obs => {
-                if (obs.type === "water" && frog.x < obs.x + obs.w && frog.x + frog.w > obs.x &&
-                    frog.y < obs.y + obs.h && frog.y + frog.h > obs.y) {
-                    onLog = true;
-                    frog.x += obs.speed; // يتحرك مع الخشبة
+            try {
+                const response = await fetch(ZIP_URL);
+                if (!response.ok) throw new Error("فشل الوصول إلى ملف zip");
+                
+                const blob = await response.blob();
+                const zip = await JSZip.loadAsync(blob);
+                
+                // البحث عن ملف index.html
+                let mainFile = null;
+                for (let path in zip.files) {
+                    if (path.endsWith('index.html')) {
+                        mainFile = zip.files[path];
+                        break;
+                    }
                 }
-            });
-            if (!onLog) resetGame();
+
+                if (mainFile) {
+                    const content = await mainFile.async("string");
+                    const blobUrl = URL.createObjectURL(new Blob([content], {type: 'text/html'}));
+                    
+                    status.style.display = 'none';
+                    frame.style.display = 'block';
+                    frame.src = blobUrl;
+                } else {
+                    status.innerText = "خطأ: تأكد أن ملف index.html موجود داخل الزيب";
+                }
+            } catch (err) {
+                status.innerText = "حدث خطأ في الرابط أو التصريحات";
+                console.error(err);
+            }
         }
 
-        requestAnimationFrame(draw);
-    }
-
-    function resetGame() {
-        frog.x = grid * 4;
-        frog.y = grid * 9;
-    }
-
-    // التحكم باللمس (مخصص للهواتف)
-    const move = (dir) => {
-        if (dir === 'up' && frog.y > 0) frog.y -= grid;
-        if (dir === 'down' && frog.y < canvas.height - grid) frog.y += grid;
-        if (dir === 'left' && frog.x > 0) frog.x -= grid;
-        if (dir === 'right' && frog.x < canvas.width - grid) frog.x += grid;
-
-        if (frog.y === 0) {
-            alert("فوز مستحق يا زورو 2!");
-            resetGame();
-        }
-    };
-
-    document.getElementById('upBtn').onclick = () => move('up');
-    document.getElementById('downBtn').onclick = () => move('down');
-    document.getElementById('leftBtn').onclick = () => move('left');
-    document.getElementById('rightBtn').onclick = () => move('right');
-
-    initObstacles();
-    draw();
-</script>
+        startEngine();
+    </script>
 </body>
 </html>
