@@ -3,21 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Frogger Classic Return 2026 - Zoro 2</title>
+    <title>Frogger Classic Return 2026</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; display: flex; justify-content: center; align-items: center; }
-        #status { color: #00FF00; font-family: monospace; text-align: center; font-size: 18px; }
+        #status { color: #00FF00; font-family: monospace; text-align: center; padding: 20px; }
         iframe { width: 100%; height: 100%; border: none; display: none; }
     </style>
 </head>
 <body>
-
-    <div id="status">جاري تحضير اللعبة يا زورو 2...</div>
+    <div id="status">جاري البحث عن ملفات اللعبة بالداخل...</div>
     <iframe id="gameFrame"></iframe>
 
     <script>
-        // الرابط المباشر للملف الذي رفعته
         const ZIP_URL = 'https://raw.githubusercontent.com/ubu-creator/Frogger-Classic-Return2026/main/frogger.zip';
 
         async function launchGame() {
@@ -26,30 +24,45 @@
 
             try {
                 const response = await fetch(ZIP_URL);
-                if (!response.ok) throw new Error("تعذر الوصول للملف");
-                
                 const blob = await response.blob();
                 const zip = await JSZip.loadAsync(blob);
                 
-                // البحث عن ملف التشغيل داخل الزيب
-                const htmlFile = zip.file("index.html") || Object.values(zip.files).find(f => f.name.endsWith('.html'));
+                // البحث عن أي ملف ينتهي بـ .html (يتجاهل المجلدات)
+                let mainFile = null;
+                for (let filename in zip.files) {
+                    if (filename.endsWith('index.html')) {
+                        mainFile = zip.files[filename];
+                        break;
+                    }
+                }
+                
+                // إذا لم يجد index.html يبحث عن أي ملف html آخر
+                if (!mainFile) {
+                    for (let filename in zip.files) {
+                        if (filename.endsWith('.html') && !filename.includes('__MACOSX')) {
+                            mainFile = zip.files[filename];
+                            break;
+                        }
+                    }
+                }
 
-                if (htmlFile) {
-                    const content = await htmlFile.async("string");
-                    const blobUrl = URL.createObjectURL(new Blob([content], {type: 'text/html'}));
+                if (mainFile) {
+                    const content = await mainFile.async("string");
+                    // تصحيح مسارات الصور والملفات الأخرى (Base Tag)
+                    const baseUrl = mainFile.name.substring(0, mainFile.name.lastIndexOf("/") + 1);
+                    const finalContent = content.replace('<head>', `<head><base href="${baseUrl}">`);
                     
+                    const blobUrl = URL.createObjectURL(new Blob([finalContent], {type: 'text/html'}));
                     status.style.display = 'none';
                     frame.style.display = 'block';
                     frame.src = blobUrl;
                 } else {
-                    status.innerText = "خطأ: ملف index.html غير موجود داخل الزيب";
+                    status.innerText = "خطأ: لم أجد أي ملف HTML لتشغيل اللعبة!";
                 }
             } catch (err) {
-                status.innerText = "حدث خطأ في التحميل، تأكد من إعدادات GitHub Pages";
-                console.error(err);
+                status.innerText = "فشل في جلب الملف. تأكد من أن الرابط مباشر.";
             }
         }
-
         launchGame();
     </script>
 </body>
