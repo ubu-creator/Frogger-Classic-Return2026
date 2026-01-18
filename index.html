@@ -1,204 +1,131 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Frogger Pro - TowMes©™ Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frogger Arcade - TowMes©™</title>
     <style>
-        :root {
-            --dark-red: #4a0000;
-            --neon-green: #39ff14;
+        /* إعدادات مانشو 2: خلفية حمراء داكنة جداً */
+        body, html {
+            margin: 0; padding: 0;
+            background-color: #4d0000; /* أحمر مغلق فخم */
+            height: 100vh;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            overflow: hidden;
+            position: relative;
         }
-        body {
-            margin: 0;
-            background-color: var(--dark-red);
+
+        /* Watermark */
+        .watermark {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+            font-size: 18px;
+            z-index: 10;
+        }
+
+        /* إطار اللعبة (المحاكي) */
+        .game-container {
+            width: 95%;
+            height: 70%;
+            border: 4px solid #ffd700; /* إطار ذهبي */
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            display: none; /* مخفي حتى الضغط على Play */
+        }
+
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* الأزرار الاحترافية */
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 80%;
+            max-width: 400px;
+        }
+
+        .main-btn {
+            padding: 20px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+        }
+
+        /* زر Play Now الجميل */
+        .play-btn {
+            background: linear-gradient(145deg, #00c853, #1b5e20);
             color: white;
         }
-        #brand {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            letter-spacing: 3px;
-            color: var(--neon-green);
-            text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+
+        /* زر Full Screen */
+        .fs-btn {
+            background: linear-gradient(145deg, #ffd700, #b8860b);
+            color: #000;
+            display: none; /* يظهر بعد تشغيل اللعبة */
         }
-        #game-container {
-            position: relative;
-            border: 5px solid #222;
-            box-shadow: 0 0 50px rgba(0,0,0,0.7);
-            background: #000;
-        }
-        canvas {
-            display: block;
-            image-rendering: pixelated;
-        }
-        .ui-overlay {
-            position: absolute;
-            bottom: 10px;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            pointer-events: none;
-            font-weight: bold;
-        }
-        .fs-button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            background: var(--neon-green);
-            color: black;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .controls {
-            display: grid;
-            grid-template-columns: repeat(3, 70px);
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .btn {
-            background: rgba(255,255,255,0.1);
-            border: 2px solid var(--neon-green);
-            color: var(--neon-green);
-            width: 70px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-size: 25px;
-            -webkit-tap-highlight-color: transparent;
-        }
+
+        .text-en { font-size: 14px; opacity: 0.9; text-transform: uppercase; }
+        .text-ar { font-size: 24px; font-weight: 900; }
+
+        .main-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
-    <div id="brand">TowMes©™</div>
+    <div class="watermark">Developed by TowMes©™</div>
 
-    <div id="game-container">
-        <canvas id="froggerCanvas"></canvas>
-        <div class="ui-overlay">
-            <span>SCORE: <span id="score">0</span></span>
-        </div>
+    <div id="start-screen" class="btn-group">
+        <button class="main-btn play-btn" onclick="startGame()">
+            <span class="text-en">PLAY NOW</span>
+            <span class="text-ar">▶️ اِلْعَبْ اَلْآنَ</span>
+        </button>
     </div>
 
-    <button class="fs-button" onclick="toggleFullScreen()">Full Screen / مِلْء الشَّاشَة</button>
-
-    <div class="controls">
-        <div></div><div class="btn" onclick="move('up')">↑</div><div></div>
-        <div class="btn" onclick="move('left')">←</div><div class="btn" onclick="move('down')">↓</div><div class="btn" onclick="move('right')">→</div>
+    <div id="game-box" class="game-container">
+        <iframe id="emu-frame" src=""></iframe>
     </div>
 
-<script>
-    /** * MANCHO 2 - Professional Emulator Engine 
-     * Strategic Statistical Balance & ZIP Resource Integration
-     */
-    const canvas = document.getElementById('froggerCanvas');
-    const ctx = canvas.getContext('2d');
+    <div id="controls" class="btn-group" style="margin-top: 15px;">
+        <button id="fs-button" class="main-btn fs-btn" onclick="toggleFullScreen()">
+            <span class="text-en">FULL SCREEN</span>
+            <span class="text-ar">📺 مِلْءُ اَلشَّاشَةِ</span>
+        </button>
+    </div>
 
-    const GRID = 40;
-    canvas.width = GRID * 9;
-    canvas.height = GRID * 10;
+    <script>
+        const gameUrl = "https://gam.onl/arcade/frogger.html#game";
 
-    let score = 0;
-    let frog = { x: 4 * GRID, y: 9 * GRID, w: 30, h: 30 };
-    
-    // Statistical Balance Configuration
-    const obstacles = [
-        { y: 8, speed: -2.0, color: '#FFD700', type: 'car' },
-        { y: 7, speed: 1.5,  color: '#FF4500', type: 'car' },
-        { y: 6, speed: -3.0, color: '#00FFFF', type: 'car' },
-        { y: 4, speed: 1.2,  color: '#8B4513', type: 'log' },
-        { y: 3, speed: -2.2, color: '#A0522D', type: 'log' },
-        { y: 2, speed: 1.8,  color: '#D2691E', type: 'log' }
-    ];
-
-    const activeObjects = [];
-    obstacles.forEach(cfg => {
-        for(let i=0; i<3; i++) {
-            activeObjects.push({
-                x: i * (canvas.width / 3),
-                y: cfg.y * GRID,
-                speed: cfg.speed,
-                color: cfg.color,
-                type: cfg.type,
-                w: cfg.type === 'log' ? GRID * 2 : GRID - 5
-            });
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-box').style.display = 'block';
+            document.getElementById('fs-button').style.display = 'flex';
+            document.getElementById('emu-frame').src = gameUrl;
         }
-    });
 
-    function draw() {
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Environment zones
-        ctx.fillStyle = '#000033'; ctx.fillRect(0, 2*GRID, canvas.width, 3*GRID); // Water
-        ctx.fillStyle = '#111'; ctx.fillRect(0, 6*GRID, canvas.width, 3*GRID); // Road
-        ctx.fillStyle = '#1e5128'; [9, 5, 1].forEach(y => ctx.fillRect(0, y*GRID, canvas.width, GRID));
-
-        let onLog = false;
-
-        activeObjects.forEach(obj => {
-            obj.x += obj.speed;
-            if (obj.speed > 0 && obj.x > canvas.width) obj.x = -obj.w;
-            if (obj.speed < 0 && obj.x < -obj.w) obj.x = canvas.width;
-
-            ctx.fillStyle = obj.color;
-            ctx.fillRect(obj.x, obj.y + 5, obj.w, GRID - 10);
-
-            // Advanced Collision (AABB)
-            if (frog.x < obj.x + obj.w && frog.x + frog.w > obj.x &&
-                frog.y < obj.y + GRID && frog.y + frog.h > obj.y) {
-                if (obj.type === 'car') resetFrog();
-                if (obj.type === 'log') {
-                    frog.x += obj.speed;
-                    onLog = true;
-                }
+        function toggleFullScreen() {
+            let elem = document.getElementById("game-box");
+            if (!document.fullscreenElement) {
+                elem.requestFullscreen().catch(err => {
+                    alert(`Error: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
             }
-        });
-
-        // Water Logic
-        if (frog.y >= 2*GRID && frog.y <= 4*GRID && !onLog) resetFrog();
-
-        // Draw Player
-        ctx.fillStyle = '#39ff14';
-        ctx.fillRect(frog.x + 5, frog.y + 5, frog.w, frog.h);
-
-        if (frog.y < GRID) { score += 100; resetFrog(); }
-        document.getElementById('score').innerText = score;
-
-        requestAnimationFrame(draw);
-    }
-
-    function resetFrog() { frog.x = 4 * GRID; frog.y = 9 * GRID; }
-
-    function move(dir) {
-        if (dir === 'up') frog.y -= GRID;
-        if (dir === 'down') frog.y += GRID;
-        if (dir === 'left') frog.x -= GRID;
-        if (dir === 'right') frog.x += GRID;
-        frog.x = Math.max(0, Math.min(canvas.width - GRID, frog.x));
-        frog.y = Math.max(0, Math.min(canvas.height - GRID, frog.y));
-    }
-
-    function toggleFullScreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-        } else if (document.exitFullscreen) {
-            document.exitFullscreen();
         }
-    }
+    </script>
 
-    draw();
-</script>
 </body>
 </html>
