@@ -1,80 +1,114 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Frogger Full - TowMes©™</title>
+    <title>Frogger Arcade - TowMes©™</title>
     <style>
-        body { background: #4d0000; color: gold; text-align: center; margin: 0; font-family: Arial; overflow: hidden; }
-        canvas { background: #000; border: 4px solid gold; display: block; margin: 10px auto; width: 90vw; height: 50vh; }
-        .btns { display: grid; grid-template-columns: repeat(3, 1fr); width: 180px; margin: 10px auto; gap: 10px; }
-        button { background: gold; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .active-btn { background: #00c853; color: white; grid-column: span 3; padding: 10px; margin-bottom: 5px; }
+        /* إعدادات مانشو 2: الخلفية الحمراء الداكنة */
+        body, html {
+            margin: 0; padding: 0;
+            background-color: #4d0000; /* أحمر مغلق فخم */
+            height: 100vh; display: flex;
+            flex-direction: column; align-items: center;
+            justify-content: center; font-family: 'Segoe UI', Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        /* حاوية المحاكي */
+        #emu-container {
+            position: relative;
+            width: 95vw; height: 65vh;
+            border: 4px solid #ffd700; /* إطار ذهبي */
+            background: #000; border-radius: 15px;
+            overflow: hidden; display: none; /* مخفي للبداية */
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* الأزرار الاحترافية */
+        .btn-group {
+            display: flex; flex-direction: column;
+            gap: 15px; width: 85%; max-width: 350px;
+        }
+
+        .action-btn {
+            padding: 18px; border-radius: 50px;
+            border: 2px solid #ffd700; cursor: pointer;
+            font-weight: bold; transition: 0.3s;
+            display: flex; flex-direction: column; align-items: center;
+            text-decoration: none;
+        }
+
+        /* زر العب الآن */
+        .play-now {
+            background: linear-gradient(145deg, #00c853, #1b5e20);
+            color: white; box-shadow: 0 5px 15px rgba(0,200,83,0.4);
+        }
+
+        /* زر فول سكرين */
+        .full-screen {
+            background: linear-gradient(145deg, #ffd700, #b8860b);
+            color: #000; display: none; margin-top: 10px;
+        }
+
+        .ar-txt { font-size: 22px; font-weight: 900; }
+        .en-txt { font-size: 11px; opacity: 0.8; text-transform: uppercase; }
+
+        /* واترمارك TowMes */
+        .towmes-mark {
+            margin-top: 20px; color: rgba(255, 215, 0, 0.6);
+            font-size: 16px; font-weight: bold; letter-spacing: 1px;
+        }
+
+        .action-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
-    <h2 style="margin:5px;">FROGGER Azraq2</h2>
-    <canvas id="froggerCanvas"></canvas>
-    
-    <div class="btns">
-        <button class="active-btn" onclick="reset()">START / RESET - اِبْدَأْ</button>
-        <div></div><button onclick="move('up')">UP</button><div></div>
-        <button onclick="move('left')">LEFT</button><button onclick="move('down')">DOWN</button><button onclick="move('right')">RIGHT</button>
+
+    <div id="ui-start" class="btn-group">
+        <button class="action-btn play-now" onclick="launchGame()">
+            <span class="ar-txt">اِلْعَبْ اَلْآنَ</span>
+            <span class="en-txt">PLAY NOW</span>
+        </button>
     </div>
 
-    <div style="font-size: 12px; opacity: 0.7;">Developed by TowMes©™</div>
+    <div id="emu-container">
+        <iframe id="game-frame" src=""></iframe>
+    </div>
+
+    <div class="btn-group">
+        <button id="fs-trigger" class="action-btn full-screen" onclick="goFull()">
+            <span class="ar-txt">مِلْءُ اَلشَّاشَةِ</span>
+            <span class="en-txt">FULL SCREEN MODE</span>
+        </button>
+    </div>
+
+    <div class="towmes-mark">Developed by TowMes©™</div>
 
     <script>
-        const canvas = document.getElementById('froggerCanvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = 400; canvas.height = 400;
+        // رابط المحاكي الذي فحصناه
+        const targetUrl = "https://megadrive-emulator.com/mobile-emulator/index.html?prn=Frogger_UJ.bin";
 
-        let grid = 40;
-        let frog = { x: 180, y: 360 };
-        let obstacles = [
-            { x: 0, y: 320, speed: 2, color: 'red', w: 60 },
-            { x: 400, y: 280, speed: -3, color: 'yellow', w: 80 },
-            { x: 0, y: 240, speed: 1.5, color: 'white', w: 50 },
-            { x: 0, y: 120, speed: 2.5, color: 'brown', w: 100 },
-            { x: 400, y: 80, speed: -2, color: 'brown', w: 120 }
-        ];
-
-        function draw() {
-            ctx.fillStyle = '#000'; ctx.fillRect(0,0,400,400); // خلفية
-            ctx.fillStyle = '#000044'; ctx.fillRect(0,40,400,120); // مياه
-            ctx.fillStyle = '#111'; ctx.fillRect(0,240,400,120); // طريق
-
-            // رسم العقبات
-            obstacles.forEach(obs => {
-                obs.x += obs.speed;
-                if(obs.x > 400 && obs.speed > 0) obs.x = -obs.w;
-                if(obs.x < -obs.w && obs.speed < 0) obs.x = 400;
-                ctx.fillStyle = obs.color;
-                ctx.fillRect(obs.x, obs.y, obs.w, 30);
-
-                // فحص التصادم
-                if (frog.x < obs.x + obs.w && frog.x + 30 > obs.x && frog.y < obs.y + 30 && frog.y + 30 > obs.y) {
-                    if (frog.y > 160) reset(); // خسر في الطريق
-                }
-            });
-
-            // رسم الضفدع
-            ctx.fillStyle = '#0f0';
-            ctx.fillRect(frog.x, frog.y, 30, 30);
-
-            if(frog.y < 40) { alert("WIN! - لَقَدْ فُزْتَ"); reset(); }
-            requestAnimationFrame(draw);
+        function launchGame() {
+            document.getElementById('ui-start').style.display = 'none';
+            document.getElementById('emu-container').style.display = 'block';
+            document.getElementById('fs-trigger').style.display = 'flex';
+            document.getElementById('game-frame').src = targetUrl;
         }
 
-        function move(dir) {
-            if(dir === 'up') frog.y -= grid;
-            if(dir === 'down') frog.y += grid;
-            if(dir === 'left') frog.x -= grid;
-            if(dir === 'right') frog.x += grid;
+        function goFull() {
+            let elem = document.getElementById("emu-container");
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
         }
-
-        function reset() { frog = { x: 180, y: 360 }; }
-        draw();
     </script>
+
 </body>
 </html>
