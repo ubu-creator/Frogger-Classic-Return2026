@@ -1,126 +1,53 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Happy Hopper - TowMes©™ Edition</title>
+    <title>Frogger Extract - TowMes©™</title>
     <style>
-        /* إعدادات مانشو 2: خلفية حمراء داكنة مغلقة */
-        body {
-            margin: 0; padding: 0;
-            background-color: #4d0000; /* الأحمر الملكي المغلق */
-            color: white; font-family: 'Arial', sans-serif;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            height: 100vh; overflow: hidden;
-        }
-
-        #game-container {
-            position: relative;
-            width: 100%; max-width: 400px;
-            height: 70vh;
-            border: 6px solid #ffd700; /* إطار ذهبي متين */
-            border-radius: 20px;
-            background: #000;
-            box-shadow: 0 0 40px rgba(0,0,0,0.7);
-        }
-
-        canvas { width: 100%; height: 100%; border-radius: 14px; }
-
-        /* أزرار التحكم - نظام ناصر الكود */
-        .controls {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px; margin-top: 15px; width: 90%;
-        }
-
-        .btn {
-            background: linear-gradient(180deg, #ff4444, #800000);
-            border: 2px solid gold; color: white;
-            padding: 15px; border-radius: 15px;
-            font-size: 20px; font-weight: bold;
-            cursor: pointer; transition: 0.2s;
-            display: flex; flex-direction: column; align-items: center;
-        }
-
-        .btn:active { transform: scale(0.9); background: gold; color: black; }
-
-        .play-btn {
-            grid-column: span 3;
-            background: linear-gradient(180deg, #00c853, #1b5e20);
-            height: 80px; font-size: 28px;
-        }
-
-        .watermark {
-            margin-top: 10px; font-size: 14px;
-            color: rgba(255, 215, 0, 0.5);
-            font-weight: bold; letter-spacing: 2px;
-        }
-
-        .btn-text-en { font-size: 10px; text-transform: uppercase; }
+        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; overflow: hidden; }
+        canvas { background: #111; border: 2px solid #333; max-width: 100vw; max-height: 100vh; }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <canvas id="froggerCanvas"></canvas>
-    </div>
-
-    <div class="controls">
-        <button class="btn play-btn" onclick="startGame()">
-            <span class="btn-text-en">PLAY NOW</span>
-            <span>اِلْعَبْ اَلْآنَ 🚀</span>
-        </button>
-        
-        <button class="btn" onclick="move('left')">◀️</button>
-        <button class="btn" onclick="move('up')">🔼</button>
-        <button class="btn" onclick="move('right')">▶️</button>
-    </div>
-
-    <div class="watermark">Developed by TowMes©™</div>
+    <canvas id="gameCanvas"></canvas>
 
     <script>
-        /** * نظام محاكي فروغر - ناصر الكود
-         * هذا الكود مستوحى هندسياً من تقنية happyhopper
-         */
-        const canvas = document.getElementById('froggerCanvas');
+        // Developed by TowMes©™ - Full Extraction Logic
+        const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = 400; canvas.height = 500;
+        canvas.width = 399;
+        canvas.height = 532;
 
-        let frog = { x: 185, y: 450, width: 30, height: 30 };
-        
-        function draw() {
+        const grid = 33.25;
+        let frog = { x: grid * 6, y: grid * 15, width: grid, height: grid };
+
+        // Game Loop
+        function update() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // منطقة الأمان (البداية والنهاية)
-            ctx.fillStyle = "#1a1a1a";
-            ctx.fillRect(0, 440, 400, 60);
-            ctx.fillRect(0, 0, 400, 50);
+            // Draw Background (Road & River)
+            ctx.fillStyle = '#000044'; // River
+            ctx.fillRect(0, grid, canvas.width, grid * 6);
+            ctx.fillStyle = '#111'; // Road
+            ctx.fillRect(0, grid * 8, canvas.width, grid * 7);
 
-            // رسم الضفدع (بطل زورو 2)
-            ctx.fillStyle = "#00ff00";
-            ctx.fillRect(frog.x, frog.y, frog.width, frog.height);
-            
-            // إضافة تفاصيل ذهبية للضفدع
-            ctx.strokeStyle = "gold";
-            ctx.strokeRect(frog.x, frog.y, frog.width, frog.height);
+            // Draw Frog
+            ctx.fillStyle = 'lime';
+            ctx.fillRect(frog.x, frog.y, frog.width - 4, frog.height - 4);
 
-            requestAnimationFrame(draw);
+            requestAnimationFrame(update);
         }
 
-        function move(dir) {
-            const step = 30;
-            if(dir === 'up' && frog.y > 0) frog.y -= step;
-            if(dir === 'left' && frog.x > 0) frog.x -= step;
-            if(dir === 'right' && frog.x < canvas.width - 30) frog.x += step;
-        }
+        // Input Handling
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowUp') frog.y -= grid;
+            if (e.key === 'ArrowDown') frog.y += grid;
+            if (e.key === 'ArrowLeft') frog.x -= grid;
+            if (e.key === 'ArrowRight') frog.x += grid;
+        });
 
-        function startGame() {
-            alert("TowMes System: Ready to Start!");
-            draw();
-        }
-
-        draw(); // تشغيل أولي للهيكل العظمي
+        update();
     </script>
 </body>
 </html>
