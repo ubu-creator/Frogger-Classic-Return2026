@@ -1,53 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Frogger Extract - TowMes©™</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Frogger Full - TowMes©™</title>
     <style>
-        body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; overflow: hidden; }
-        canvas { background: #111; border: 2px solid #333; max-width: 100vw; max-height: 100vh; }
+        body { background: #4d0000; color: gold; text-align: center; margin: 0; font-family: Arial; overflow: hidden; }
+        canvas { background: #000; border: 4px solid gold; display: block; margin: 10px auto; width: 90vw; height: 50vh; }
+        .btns { display: grid; grid-template-columns: repeat(3, 1fr); width: 180px; margin: 10px auto; gap: 10px; }
+        button { background: gold; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .active-btn { background: #00c853; color: white; grid-column: span 3; padding: 10px; margin-bottom: 5px; }
     </style>
 </head>
 <body>
+    <h2 style="margin:5px;">FROGGER Azraq2</h2>
+    <canvas id="froggerCanvas"></canvas>
+    
+    <div class="btns">
+        <button class="active-btn" onclick="reset()">START / RESET - اِبْدَأْ</button>
+        <div></div><button onclick="move('up')">UP</button><div></div>
+        <button onclick="move('left')">LEFT</button><button onclick="move('down')">DOWN</button><button onclick="move('right')">RIGHT</button>
+    </div>
 
-    <canvas id="gameCanvas"></canvas>
+    <div style="font-size: 12px; opacity: 0.7;">Developed by TowMes©™</div>
 
     <script>
-        // Developed by TowMes©™ - Full Extraction Logic
-        const canvas = document.getElementById('gameCanvas');
+        const canvas = document.getElementById('froggerCanvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = 399;
-        canvas.height = 532;
+        canvas.width = 400; canvas.height = 400;
 
-        const grid = 33.25;
-        let frog = { x: grid * 6, y: grid * 15, width: grid, height: grid };
+        let grid = 40;
+        let frog = { x: 180, y: 360 };
+        let obstacles = [
+            { x: 0, y: 320, speed: 2, color: 'red', w: 60 },
+            { x: 400, y: 280, speed: -3, color: 'yellow', w: 80 },
+            { x: 0, y: 240, speed: 1.5, color: 'white', w: 50 },
+            { x: 0, y: 120, speed: 2.5, color: 'brown', w: 100 },
+            { x: 400, y: 80, speed: -2, color: 'brown', w: 120 }
+        ];
 
-        // Game Loop
-        function update() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw Background (Road & River)
-            ctx.fillStyle = '#000044'; // River
-            ctx.fillRect(0, grid, canvas.width, grid * 6);
-            ctx.fillStyle = '#111'; // Road
-            ctx.fillRect(0, grid * 8, canvas.width, grid * 7);
+        function draw() {
+            ctx.fillStyle = '#000'; ctx.fillRect(0,0,400,400); // خلفية
+            ctx.fillStyle = '#000044'; ctx.fillRect(0,40,400,120); // مياه
+            ctx.fillStyle = '#111'; ctx.fillRect(0,240,400,120); // طريق
 
-            // Draw Frog
-            ctx.fillStyle = 'lime';
-            ctx.fillRect(frog.x, frog.y, frog.width - 4, frog.height - 4);
+            // رسم العقبات
+            obstacles.forEach(obs => {
+                obs.x += obs.speed;
+                if(obs.x > 400 && obs.speed > 0) obs.x = -obs.w;
+                if(obs.x < -obs.w && obs.speed < 0) obs.x = 400;
+                ctx.fillStyle = obs.color;
+                ctx.fillRect(obs.x, obs.y, obs.w, 30);
 
-            requestAnimationFrame(update);
+                // فحص التصادم
+                if (frog.x < obs.x + obs.w && frog.x + 30 > obs.x && frog.y < obs.y + 30 && frog.y + 30 > obs.y) {
+                    if (frog.y > 160) reset(); // خسر في الطريق
+                }
+            });
+
+            // رسم الضفدع
+            ctx.fillStyle = '#0f0';
+            ctx.fillRect(frog.x, frog.y, 30, 30);
+
+            if(frog.y < 40) { alert("WIN! - لَقَدْ فُزْتَ"); reset(); }
+            requestAnimationFrame(draw);
         }
 
-        // Input Handling
-        window.addEventListener('keydown', e => {
-            if (e.key === 'ArrowUp') frog.y -= grid;
-            if (e.key === 'ArrowDown') frog.y += grid;
-            if (e.key === 'ArrowLeft') frog.x -= grid;
-            if (e.key === 'ArrowRight') frog.x += grid;
-        });
+        function move(dir) {
+            if(dir === 'up') frog.y -= grid;
+            if(dir === 'down') frog.y += grid;
+            if(dir === 'left') frog.x -= grid;
+            if(dir === 'right') frog.x += grid;
+        }
 
-        update();
+        function reset() { frog = { x: 180, y: 360 }; }
+        draw();
     </script>
 </body>
 </html>
