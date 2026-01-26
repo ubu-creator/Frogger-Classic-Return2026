@@ -3,129 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Azraq2 - Instructions</title>
     <style>
-        /* 1. STABILIZE PAGE - منع اهتزاز أو تحرك الصفحة */
+        /* 1. STABILIZE PAGE - تثبيت الهيكل العظمي للمبنى */
         html, body {
             background-color: #000000;
             color: #ffffff;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow-x: hidden; /* تثبيت العرض ومنع التمرير الجانبي */
-            position: fixed;   /* تثبيت الهيكل العام */
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden; /* منع التمرير نهائياً لتثبيت الصفحة */
+            display: flex;
+            flex-direction: column;
+            user-select: none;
         }
 
-        /* 2. MEDIUM MARQUEE - الشريط العلوي */
-        .marquee-container {
-            background: #8b0000;
-            color: #ffffff;
-            height: 40px;
-            line-height: 40px;
-            font-size: 16px;
-            font-weight: bold;
-            text-transform: uppercase;
+        /* 2. ENHANCED MARQUEE - تحسين الشريط المتحرك */
+        .marquee-wrapper {
+            background: linear-gradient(90deg, #4b0000, #8b0000, #4b0000);
+            height: 45px;
+            display: flex;
+            align-items: center;
             border-bottom: 2px solid #ff0000;
-            white-space: nowrap;
             overflow: hidden;
+            position: relative;
         }
 
         .marquee-content {
-            display: inline-block;
-            padding-left: 100%;
-            animation: scroll-text 12s linear infinite;
+            display: flex;
+            white-space: nowrap;
+            animation: scroll-left 15s linear infinite;
         }
 
-        @keyframes scroll-text {
+        .marquee-item {
+            font-size: 14px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            padding: 0 40px;
+            text-transform: uppercase;
+            color: #ffffff;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        @keyframes scroll-left {
             0% { transform: translateX(0); }
-            100% { transform: translateX(-100%); }
+            100% { transform: translateX(-50%); }
         }
 
-        /* 3. FIXED HORIZONTAL GRID - التنسيق الأفقي الثابت */
-        .instruction-grid {
-            display: flex; /* ترتيب أفقي إجباري */
-            width: 100%;
-            height: calc(100% - 42px);
+        /* 3. VERTICAL INSTRUCTION GRID - مربعات عمودية منفردة */
+        .main-container {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* توزيع متساوي للأعمدة */
+            gap: 10px;
+            padding: 15px 10px;
             box-sizing: border-box;
-            padding: 10px 5px;
-            gap: 5px;
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000000 100%);
         }
 
-        .column {
-            flex: 1; /* تقسيم الشاشة لثلاثة أجزاء متساوية تماماً */
-            background: #0a0a0a;
+        .lang-column {
+            background: rgba(15, 15, 15, 0.8);
             border: 1px solid #330000;
-            border-radius: 5px;
+            border-radius: 8px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 10px 2px;
-            box-shadow: inset 0 0 10px #000;
+            padding: 20px 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            position: relative;
         }
 
-        .column:hover {
+        .lang-column:hover {
             border-color: #ff0000;
+            background: rgba(25, 0, 0, 0.4);
+            transform: translateY(-2px);
         }
 
-        /* Titles and Steps */
-        .title {
+        /* Headers & Steps */
+        .lang-title {
             color: #ff0000;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #ff0000;
+            padding-bottom: 5px;
+            width: 80%;
+            text-align: center;
+        }
+
+        .step {
+            font-size: 12px;
+            margin: 12px 0;
+            color: #cccccc;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .dot {
+            color: #ff0000;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .mode-highlight {
+            margin-top: auto;
+            background: #ff0000;
+            color: #ffffff;
+            padding: 8px 10px;
+            border-radius: 4px;
             font-size: 11px;
             font-weight: bold;
-            margin-bottom: 10px;
-            text-decoration: underline;
-        }
-
-        .step-text {
-            font-size: 10px;
-            margin: 5px 0;
+            width: 90%;
             text-align: center;
-            color: #dddddd;
-            width: 100%;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
         }
 
-        .red-dot { color: #ff0000; font-weight: bold; }
-        .highlight { color: #ff0000; font-weight: bold; font-size: 11px; margin-top: 5px;}
+        .ar { direction: rtl; font-family: 'Segoe UI', Tahoma, sans-serif; }
 
-        /* RTL for Arabic */
-        .ar { direction: rtl; }
+        /* Footer */
+        .footer {
+            height: 25px;
+            font-size: 10px;
+            text-align: center;
+            color: #444;
+            line-height: 25px;
+            background: #050505;
+        }
     </style>
 </head>
 <body>
 
-    <div class="marquee-container">
+    <div class="marquee-wrapper">
         <div class="marquee-content">
-            How To Use Our App • How To Use Our App • How To Use Our App
+            <div class="marquee-item">★ How To Use Azraq2 App ★</div>
+            <div class="marquee-item">★ How To Use Azraq2 App ★</div>
+            <div class="marquee-item">★ How To Use Azraq2 App ★</div>
+            <div class="marquee-item">★ How To Use Azraq2 App ★</div>
         </div>
     </div>
 
-    <div class="instruction-grid">
+    <div class="main-container">
         
-        <div class="column">
-            <div class="title">ENGLISH</div>
-            <div class="step-text">YouTube <span class="red-dot">...</span></div>
-            <div class="step-text">General</div>
-            <div class="step-text">Appearance</div>
-            <div class="highlight">Dark Mode</div>
+        <div class="lang-column">
+            <div class="lang-title">English</div>
+            <div class="step">YouTube <span class="dot">...</span></div>
+            <div class="step">Settings</div>
+            <div class="step">General</div>
+            <div class="step">Appearance</div>
+            <div class="mode-highlight">DARK MODE</div>
         </div>
 
-        <div class="column">
-            <div class="title">FRANÇAIS</div>
-            <div class="step-text">YouTube <span class="red-dot">...</span></div>
-            <div class="step-text">Paramètres</div>
-            <div class="step-text">Apparence</div>
-            <div class="highlight">Mode Sombre</div>
+        <div class="lang-column">
+            <div class="lang-title">Français</div>
+            <div class="step">YouTube <span class="dot">...</span></div>
+            <div class="step">Paramètres</div>
+            <div class="step">Général</div>
+            <div class="step">Apparence</div>
+            <div class="mode-highlight">MODE SOMBRE</div>
         </div>
 
-        <div class="column ar">
-            <div class="title">العربية</div>
-            <div class="step-text">يوتيوب <span class="red-dot">...</span></div>
-            <div class="step-text">إعدادات عامة</div>
-            <div class="step-text">المظهر</div>
-            <div class="highlight">وضع داكن</div>
+        <div class="lang-column ar">
+            <div class="lang-title">العربية</div>
+            <div class="step">يوتيوب <span class="dot">...</span></div>
+            <div class="step">الإعدادات</div>
+            <div class="step">إعدادات عامة</div>
+            <div class="step">المظهر</div>
+            <div class="mode-highlight">الوضع الداكن</div>
         </div>
 
+    </div>
+
+    <div class="footer">
+        Developed by TowMes©™ | ناصر الكود - ناصر10
     </div>
 
 </body>
