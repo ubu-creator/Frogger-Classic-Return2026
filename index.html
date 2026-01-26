@@ -3,48 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Azraq2 - Instructions</title>
+    <title>Azraq2 - Pro</title>
     <style>
-        /* 1. STABILIZE PAGE - تثبيت الهيكل العظمي للمبنى */
+        /* 1. STABILIZE PAGE */
         html, body {
             background-color: #000000;
             color: #ffffff;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
             padding: 0;
             width: 100vw;
             height: 100vh;
-            overflow: hidden; /* منع التمرير نهائياً لتثبيت الصفحة */
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            user-select: none;
         }
 
-        /* 2. ENHANCED MARQUEE - تحسين الشريط المتحرك */
+        /* 2. IMPROVED MARQUEE */
         .marquee-wrapper {
-            background: linear-gradient(90deg, #4b0000, #8b0000, #4b0000);
-            height: 45px;
+            background: #8b0000;
+            height: 50px;
             display: flex;
             align-items: center;
-            border-bottom: 2px solid #ff0000;
+            border-bottom: 3px solid #ff0000;
             overflow: hidden;
-            position: relative;
         }
 
         .marquee-content {
             display: flex;
             white-space: nowrap;
-            animation: scroll-left 15s linear infinite;
+            animation: scroll-left 12s linear infinite;
         }
 
         .marquee-item {
-            font-size: 14px;
-            font-weight: 900;
-            letter-spacing: 1px;
-            padding: 0 40px;
-            text-transform: uppercase;
+            font-size: 18px; /* تكبير الخط */
+            font-weight: bold;
+            padding: 0 50px;
             color: #ffffff;
-            text-shadow: 1px 1px 2px #000;
         }
 
         @keyframes scroll-left {
@@ -52,135 +47,158 @@
             100% { transform: translateX(-50%); }
         }
 
-        /* 3. VERTICAL INSTRUCTION GRID - مربعات عمودية منفردة */
-        .main-container {
-            flex: 1;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr); /* توزيع متساوي للأعمدة */
-            gap: 10px;
-            padding: 15px 10px;
-            box-sizing: border-box;
-            background: radial-gradient(circle at center, #0a0a0a 0%, #000000 100%);
-        }
-
-        .lang-column {
-            background: rgba(15, 15, 15, 0.8);
-            border: 1px solid #330000;
-            border-radius: 8px;
+        /* 3. CLOCK & DATE SECTION */
+        .info-header {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px 5px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            padding: 10px 0;
+            background: #0a0a0a;
+        }
+
+        .clock {
+            width: 80px;
+            height: 80px;
+            border: 3px solid #ff0000;
+            border-radius: 50%;
             position: relative;
+            margin-bottom: 5px;
         }
 
-        .lang-column:hover {
-            border-color: #ff0000;
-            background: rgba(25, 0, 0, 0.4);
-            transform: translateY(-2px);
+        .clock .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            background: #ffffff;
+            transform-origin: bottom;
+            border-radius: 4px;
         }
 
-        /* Headers & Steps */
-        .lang-title {
-            color: #ff0000;
-            font-size: 14px;
+        .hour-hand { width: 4px; height: 20px; background: #ff0000 !important; }
+        .min-hand { width: 3px; height: 30px; }
+        .sec-hand { width: 1px; height: 35px; background: #ff0000 !important; }
+
+        .date-display {
+            font-size: 16px;
             font-weight: bold;
-            margin-bottom: 25px;
-            text-transform: uppercase;
-            border-bottom: 1px solid #ff0000;
-            padding-bottom: 5px;
-            width: 80%;
+            color: #ff0000;
+        }
+
+        /* 4. HORIZONTAL BOXES (STACKED) */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            overflow-y: auto; /* للسماح بالتمرير داخل الحاوية فقط إذا لزم الأمر */
+        }
+
+        .lang-row {
+            background: #0f0f0f;
+            border: 1px solid #330000;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
         }
 
-        .step {
-            font-size: 12px;
-            margin: 12px 0;
-            color: #cccccc;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        .lang-title {
+            color: #ff0000;
+            font-size: 20px; /* تكبير العنوان */
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-decoration: underline;
         }
 
-        .dot {
+        .steps-wrapper {
+            font-size: 15px; /* تكبير الحروف */
+            line-height: 1.6;
+            color: #dddddd;
+        }
+
+        .highlight {
             color: #ff0000;
             font-weight: bold;
             font-size: 16px;
+            margin-top: 5px;
         }
 
-        .mode-highlight {
-            margin-top: auto;
-            background: #ff0000;
-            color: #ffffff;
-            padding: 8px 10px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
-        }
+        .ar { direction: rtl; }
 
-        .ar { direction: rtl; font-family: 'Segoe UI', Tahoma, sans-serif; }
-
-        /* Footer */
         .footer {
-            height: 25px;
-            font-size: 10px;
+            height: 30px;
             text-align: center;
-            color: #444;
-            line-height: 25px;
+            font-size: 12px;
             background: #050505;
+            line-height: 30px;
         }
     </style>
 </head>
 <body>
 
     <div class="marquee-wrapper">
-        <div class="marquee-content">
-            <div class="marquee-item"> Welcome / مَرحبا</div>
-            <div class="marquee-item">How To Use Our App/</div>
-            <div class="marquee-item">كَيفَ تَستعْمل تطبِبقنا</div>
+        <div class="marquee-content" id="mq">
+            <div class="marquee-item">Welcome / مَرحبا ★ How To Use Our App / كَيفَ تَستعْمل تطبِبقنا</div>
+            <div class="marquee-item">Welcome / مَرحبا ★ How To Use Our App / كَيفَ تَستعْمل تطبِبقنا</div>
         </div>
+    </div>
+
+    <div class="info-header">
+        <div class="clock" id="clock">
+            <div class="hand hour-hand" id="hour"></div>
+            <div class="hand min-hand" id="min"></div>
+            <div class="hand sec-hand" id="sec"></div>
+        </div>
+        <div class="date-display" id="date"></div>
     </div>
 
     <div class="main-container">
-        
-        <div class="lang-column">
-            <div class="lang-title">English</div>
-            <div class="step">On YouTube <span class="Click 3 dots">...</span></div>
-            <div class="step">Click Settings</div>
-            <div class="step">Click General</div>
-            <div class="step">Click Appearance</div>
-            <div class="mode-highlight">Select DARK MODE</div>
+        <div class="lang-row">
+            <div class="lang-title">ENGLISH</div>
+            <div class="steps-wrapper">
+                YouTube (Click 3 dots) • Settings • General • Appearance
+            </div>
+            <div class="highlight">Select DARK MODE</div>
         </div>
 
-        <div class="lang-column">
-            <div class="lang-title">Français</div>
-            <div class="step">Sur YouTube <span class="Cliquer 3 Points">...</span></div>
-            <div class="step">Cliquer Paramètres</div>
-            <div class="step">Selecter Général</div>
-            <div class="step">Choisir Apparence</div>
-            <div class="mode-highlight">Choisir MODE SOMBRE</div>
+        <div class="lang-row">
+            <div class="lang-title">FRANÇAIS</div>
+            <div class="steps-wrapper">
+                YouTube (Cliquer 3 Points) • Paramètres • Général • Apparence
+            </div>
+            <div class="highlight">MODE SOMBRE</div>
         </div>
 
-        <div class="lang-column ar">
+        <div class="lang-row ar">
             <div class="lang-title">العربية</div>
-            <div class="step"> على يوتيوب <span class=" إضغط 3 نقاط">...</span></div>
-            <div class="step">إضغط على الإعدادات</div>
-            <div class="step">إضغط على الإعدادات العامة</div>
-            <div class="step">إضغط على خيار المظهر</div>
-            <div class="mode-highlight">تفعيل خيار الوضع الداكن</div>
+            <div class="steps-wrapper">
+                يوتيوب (إضغط 3 نقاط) • الإعدادات • إعدادات عامة • المظهر
+            </div>
+            <div class="highlight">تفعيل الوضع الداكن</div>
         </div>
-
     </div>
 
-    <div class="footer">
-        Developed by TowMes©™  
-    </div>
+    <div class="footer">Developed by TowMes©™</div>
 
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const s = now.getSeconds() * 6;
+            const m = now.getMinutes() * 6;
+            const h = (now.getHours() % 12) * 30 + (m / 12);
+
+            document.getElementById('sec').style.transform = `rotate(${s}deg)`;
+            document.getElementById('min').style.transform = `rotate(${m}deg)`;
+            document.getElementById('hour').style.transform = `rotate(${h}deg)`;
+
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('date').innerText = now.toLocaleDateString('en-GB', options);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
 </body>
 </html>
