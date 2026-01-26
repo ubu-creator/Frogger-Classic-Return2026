@@ -1,73 +1,130 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { background: #4d0000; color: gold; text-align: center; margin: 0; font-family: 'Courier New', monospace; overflow: hidden; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        canvas { background: #000; border: 4px solid gold; width: 90vw; height: 50vh; image-rendering: pixelated; }
-        .ui { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 220px; margin-top: 10px; }
-        button { background: gold; border: none; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 20px; cursor: pointer; box-shadow: 0 4px #b8860b; }
-        .play-now { grid-column: span 3; background: #00c853; color: white; margin-bottom: 5px; }
-        .watermark { margin-top: 10px; font-weight: bold; opacity: 0.7; }
+        /* CSS STYLING - THE BONE STRUCTURE */
+        body {
+            background-color: #000000; /* Pure Black Background */
+            color: #ffffff;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Animated Marquee - How to use */
+        .marquee-container {
+            background: #8b0000; /* Dark Red Background */
+            color: #ffffff;
+            padding: 12px 0;
+            font-weight: 700;
+            font-size: 15px;
+            text-transform: uppercase;
+            border-bottom: 3px solid #ff0000; /* Neon Red Border */
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+            overflow: hidden;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .marquee-text {
+            display: inline-block;
+            white-space: nowrap;
+            padding-left: 100%;
+            animation: scroll-left 15s linear infinite;
+        }
+
+        @keyframes scroll-left {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Content Container */
+        .main-content {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .card {
+            background: #121212; /* Dark Grey/Black Card */
+            border: 1px solid #330000; /* Deep Red Subtle Border */
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            border-color: #ff0000; /* Glowing Red on Hover */
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #ff0000; /* Red Titles */
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        p {
+            color: #cccccc;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        /* Action Button */
+        .btn-action {
+            display: inline-block;
+            background: #ff0000;
+            color: #ffffff;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+        }
+
+        .btn-action:hover {
+            background: #b30000;
+            transform: translateY(-2px);
+        }
+
+        /* Red Accents - Decorative Lines */
+        .divider {
+            height: 2px;
+            width: 50px;
+            background: #ff0000;
+            margin: 15px auto;
+        }
     </style>
 </head>
 <body>
-    <h2 style="margin:5px;">FROGGER ATARI - Azraq2</h2>
-    <canvas id="g"></canvas>
-    <div class="ui">
-        <button class="play-now" onclick="rst()">اِلْعَبْ اَلْآنَ - PLAY NOW</button>
-        <div></div><button onclick="mv(0,-40)">↑</button><div></div>
-        <button onclick="mv(-40,0)">←</button><button onclick="mv(0,40)">↓</button><button onclick="mv(40,0)">→</button>
+
+    <div class="marquee-container">
+        <div class="marquee-text">
+            HOW TO USE: 1. SELECT YOUR SERVICE -- 2. FOLLOW THE RED GUIDELINES -- 3. ENJOY TOWMES PREMIUM FEATURES -- AZRAQ2 IS READY FOR ACTION!
+        </div>
     </div>
-    <div class="watermark">Developed by TowMes©™</div>
 
-    <script>
-        const c = document.getElementById('g'), x = c.getContext('2d');
-        c.width = 400; c.height = 400;
-        let f = {x:185, y:360}, obs = [];
-        
-        // بناء العقبات بتوازن إحصائي دقيق (ناصر الكود)
-        function init() {
-            obs = [];
-            for(let i=0; i<6; i++) {
-                obs.push({
-                    x: Math.random()*400, 
-                    y: 40 + (i*50), 
-                    w: 60 + Math.random()*40, 
-                    s: (1.5 + Math.random()*2) * (i%2?1:-1),
-                    c: ['#f00','#ff0','#fff','#0ff','#f80','#f0f'][i]
-                });
-            }
-        }
+    <div class="main-content">
+        <div class="card">
+            <h1>TowMes Dashboard</h1>
+            <div class="divider"></div>
+            <p>Welcome to the core of <strong>Azraq2</strong>. Here you can manage your digital assets with maximum precision and strategic balance.</p>
+            <a href="#" class="btn-action">GET STARTED</a>
+        </div>
 
-        function draw() {
-            x.fillStyle = '#000'; x.fillRect(0,0,400,400); // الطريق
-            x.fillStyle = '#111'; x.fillRect(0,360,400,40); // البداية
-            x.fillStyle = '#004'; x.fillRect(0,0,400,40);   // النهاية
+        <div class="card" style="margin-top: 30px;">
+            <h1 style="font-size: 18px;">System Status</h1>
+            <p style="font-size: 14px;">All systems operational. Privacy policy updated. Statistical balance achieved.</p>
+        </div>
+    </div>
 
-            obs.forEach(o => {
-                o.x += o.s;
-                if(o.x > 400) o.x = -o.w;
-                if(o.x < -o.w) o.x = 400;
-                x.fillStyle = o.c;
-                x.fillRect(o.x, o.y, o.w, 30);
-                // تصادم دقيق جداً
-                if(f.x < o.x+o.w && f.x+30 > o.x && f.y < o.y+30 && f.y+30 > o.y) rst();
-            });
-
-            x.fillStyle = '#0f0'; x.fillRect(f.x, f.y, 30, 30); // الضفدع
-            if(f.y < 40) { alert("WIN! - TowMes©™"); rst(); }
-            requestAnimationFrame(draw);
-        }
-
-        function mv(dx,dy) { 
-            f.x+=dx; f.y+=dy; 
-            if(f.x<0) f.x=0; if(f.x>370) f.x=370;
-            if(f.y>360) f.y=360;
-        }
-        function rst() { f = {x:185, y:360}; init(); }
-        init(); draw();
-    </script>
 </body>
 </html>
