@@ -4,126 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* CSS STYLING - THE BONE STRUCTURE */
+        /* CSS CORE STRUCTURE */
         body {
-            background-color: #000000; /* Pure Black Background */
+            background-color: #000000;
             color: #ffffff;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
             overflow-x: hidden;
         }
 
-        /* Animated Marquee - How to use */
-        .marquee-container {
-            background: #8b0000; /* Dark Red Background */
+        /* 1. TOP MARQUEE (Medium Size) */
+        .marquee-top {
+            background: #990000;
             color: #ffffff;
-            padding: 12px 0;
-            font-weight: 700;
-            font-size: 15px;
-            text-transform: uppercase;
-            border-bottom: 3px solid #ff0000; /* Neon Red Border */
-            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
-            overflow: hidden;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .marquee-text {
-            display: inline-block;
-            white-space: nowrap;
-            padding-left: 100%;
-            animation: scroll-left 15s linear infinite;
-        }
-
-        @keyframes scroll-left {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-100%); }
-        }
-
-        /* Content Container */
-        .main-content {
-            padding: 20px;
-            text-align: center;
-        }
-
-        .card {
-            background: #121212; /* Dark Grey/Black Card */
-            border: 1px solid #330000; /* Deep Red Subtle Border */
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transition: 0.3s;
-        }
-
-        .card:hover {
-            border-color: #ff0000; /* Glowing Red on Hover */
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
-        }
-
-        h1 {
-            color: #ff0000; /* Red Titles */
-            font-size: 24px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        p {
-            color: #cccccc;
-            line-height: 1.6;
-            font-size: 16px;
-        }
-
-        /* Action Button */
-        .btn-action {
-            display: inline-block;
-            background: #ff0000;
-            color: #ffffff;
-            padding: 12px 30px;
-            border-radius: 50px;
-            text-decoration: none;
+            padding: 8px 0;
+            font-size: 18px; /* Medium Size */
             font-weight: bold;
-            margin-top: 15px;
-            transition: 0.3s;
-            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+            text-transform: uppercase;
+            border-bottom: 2px solid #ff0000;
+            overflow: hidden;
+            white-space: nowrap;
         }
 
-        .btn-action:hover {
-            background: #b30000;
-            transform: translateY(-2px);
+        .marquee-top span {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee-speed 10s linear infinite;
         }
 
-        /* Red Accents - Decorative Lines */
-        .divider {
-            height: 2px;
-            width: 50px;
-            background: #ff0000;
-            margin: 15px auto;
+        @keyframes marquee-speed {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
         }
+
+        /* 2. HORIZONTAL LAYOUT FOR LANGUAGES */
+        .main-grid {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px 10px;
+            gap: 10px;
+            flex-wrap: nowrap; /* Forces horizontal alignment */
+        }
+
+        .lang-column {
+            flex: 1;
+            background: #111111;
+            border: 1px solid #330000;
+            border-radius: 10px;
+            padding: 15px 10px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(255, 0, 0, 0.1);
+            min-width: 100px;
+        }
+
+        .lang-column:hover {
+            border-color: #ff0000;
+            background: #1a0000;
+        }
+
+        .lang-title {
+            color: #ff0000;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ff0000;
+            padding-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .step {
+            font-size: 12px;
+            margin: 8px 0;
+            color: #cccccc;
+            line-height: 1.4;
+        }
+
+        .arrow { color: #ff0000; font-weight: bold; }
+
+        .ar { direction: rtl; }
     </style>
 </head>
 <body>
 
-    <div class="marquee-container">
-        <div class="marquee-text">
-            HOW TO USE: 1. SELECT YOUR SERVICE -- 2. FOLLOW THE RED GUIDELINES -- 3. ENJOY TOWMES PREMIUM FEATURES -- AZRAQ2 IS READY FOR ACTION!
-        </div>
+    <div class="marquee-top">
+        <span>How To Use Our App &bull; How To Use Our App &bull; How To Use Our App</span>
     </div>
 
-    <div class="main-content">
-        <div class="card">
-            <h1>TowMes Dashboard</h1>
-            <div class="divider"></div>
-            <p>Welcome to the core of <strong>Azraq2</strong>. Here you can manage your digital assets with maximum precision and strategic balance.</p>
-            <a href="#" class="btn-action">GET STARTED</a>
+    <div class="main-grid">
+        
+        <div class="lang-column">
+            <div class="lang-title">ENGLISH</div>
+            <div class="step">Top YouTube <span class="arrow">...</span></div>
+            <div class="step">Click General</div>
+            <div class="step">Appearance</div>
+            <div class="step" style="color:#ff0000; font-weight:bold;">Dark Mode</div>
         </div>
 
-        <div class="card" style="margin-top: 30px;">
-            <h1 style="font-size: 18px;">System Status</h1>
-            <p style="font-size: 14px;">All systems operational. Privacy policy updated. Statistical balance achieved.</p>
+        <div class="lang-column">
+            <div class="lang-title">FRANÇAIS</div>
+            <div class="step">YouTube <span class="arrow">...</span></div>
+            <div class="step">Paramètres</div>
+            <div class="step">Apparence</div>
+            <div class="step" style="color:#ff0000; font-weight:bold;">Mode Sombre</div>
         </div>
+
+        <div class="lang-column ar">
+            <div class="lang-title">العربية</div>
+            <div class="step">أعلى يوتيوب <span class="arrow">...</span></div>
+            <div class="step">الإعدادات عامة</div>
+            <div class="step">المظهر</div>
+            <div class="step" style="color:#ff0000; font-weight:bold;">وضع داكن</div>
+        </div>
+
     </div>
 
 </body>
