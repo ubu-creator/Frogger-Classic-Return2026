@@ -1,61 +1,110 @@
-// Developed by TowMes©™ - Project: Azraq2 Pinball
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azraq2 Pinball Pro - Developed by TowMes©™</title>
+    <style>
+        body { margin: 0; background: #050505; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; font-family: 'Arial', sans-serif; overflow: hidden; }
+        canvas { background: #111; border: 4px solid #00d2ff; box-shadow: 0 0 20px #00d2ff; border-radius: 10px; }
+        .ui { position: absolute; top: 20px; left: 20px; font-size: 24px; text-shadow: 0 0 10px #00d2ff; }
+    </style>
+</head>
+<body>
 
-// Unique constants for professional physics balance
-const GRAVITY = 0.15;
+<div class="ui">Score: <span id="score">0</span></div>
+<canvas id="pinballCanvas"></canvas>
+
+<script>
+// Developed by TowMes©™ | Project: Azraq2
+const canvas = document.getElementById("pinballCanvas");
+const ctx = canvas.getContext("2d");
+const scoreElement = document.getElementById("score");
+
+canvas.width = 450;
+canvas.height = 700;
+
+// Strategic Physics Constants
+const GRAVITY = 0.25;
 const FRICTION = 0.98;
-const BOUNCE = -0.7;
+let score = 0;
 
 let ball = {
-    x: 200, y: 50, r: 10,
-    vx: 2, vy: 0,
-    color: "#00FFFF" // Neon Blue for Azraq2
+    x: 225, y: 100, r: 12,
+    vx: 5, vy: 0,
+    color: "#00d2ff"
 };
 
-// Professional Flipper structure (Skeleton of the game)
-let leftFlipper = { x: 100, y: 550, width: 80, height: 15, angle: 0.2, active: false };
-let rightFlipper = { x: 220, y: 550, width: 80, height: 15, angle: -0.2, active: false };
+// Bumper Object (The Pure Unique Numbers for balance)
+let bumpers = [
+    {x: 150, y: 200, r: 35, color: "#ff0055"},
+    {x: 300, y: 200, r: 35, color: "#ff0055"},
+    {x: 225, y: 350, r: 40, color: "#ff0055"}
+];
 
 function drawBall() {
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
     ctx.fillStyle = ball.color;
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = "#00FFFF";
     ctx.fill();
     ctx.closePath();
-    ctx.shadowBlur = 0; // Reset for performance
 }
 
-function updatePhysics() {
-    // Apply Strategic Gravity
+function drawBumpers() {
+    bumpers.forEach(b => {
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.strokeStyle = b.color;
+        ctx.lineWidth = 5;
+        ctx.stroke();
+        ctx.closePath();
+    });
+}
+
+function update() {
+    // 1. Apply Gravity (Professional Logic)
     ball.vy += GRAVITY;
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    // Walls Collision
+    // 2. Wall Collisions
     if (ball.x + ball.r > canvas.width || ball.x - ball.r < 0) {
-        ball.vx *= -1;
+        ball.vx *= -0.8; 
+        ball.x = ball.x < ball.r ? ball.r : canvas.width - ball.r;
     }
-    if (ball.y - ball.r < 0) {
-        ball.vy *= BOUNCE;
-    }
+    if (ball.y - ball.r < 0) ball.vy *= -0.8;
 
-    // Reset if out of bounds (No annoying alerts)
+    // 3. Bumper Collisions (Vector Physics)
+    bumpers.forEach(b => {
+        let dx = ball.x - b.x;
+        let dy = ball.y - b.y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < ball.r + b.r) {
+            // Realistic Bounce
+            let angle = Math.atan2(dy, dx);
+            ball.vx = Math.cos(angle) * 10;
+            ball.vy = Math.sin(angle) * 10;
+            score += 10;
+            scoreElement.innerText = score;
+        }
+    });
+
+    // 4. Reset Ball (No Shawa'ib/Alerts)
     if (ball.y > canvas.height) {
-        ball.y = 50;
-        ball.vy = 0;
-        ball.vx = (Math.random() - 0.5) * 4;
+        ball.y = 50; ball.vy = 0; ball.vx = (Math.random() - 0.5) * 10;
     }
 }
 
-function render() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    updatePhysics();
+function loop() {
+    ctx.fillStyle = "rgba(10, 10, 10, 0.3)"; // Trail effect
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawBumpers();
     drawBall();
-    // Professional Tip: Add Bumpers and Flippers drawing logic here
-    requestAnimationFrame(render);
+    update();
+    requestAnimationFrame(loop);
 }
 
-render();
+loop();
+</script>
+</body>
+</html>
