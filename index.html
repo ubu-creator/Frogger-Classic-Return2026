@@ -1,225 +1,61 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Azraq2 - Professional Edition</title>
-    <style>
-        /* 1. STABILIZE PAGE */
-        html, body {
-            background-color: #000000;
-            color: #ffffff;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
+// Developed by TowMes©™ - Project: Azraq2 Pinball
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-        /* 2. PRO MARQUEE - تصغير الارتفاع وتثقيل السرعة */
-        .marquee-wrapper {
-            background: #8b0000;
-            height: 25px; /* تصغير يدوي للارتفاع */
-            display: flex;
-            align-items: center;
-            border-bottom: 2px solid #ff0000;
-            overflow: hidden;
-        }
+// Unique constants for professional physics balance
+const GRAVITY = 0.15;
+const FRICTION = 0.98;
+const BOUNCE = -0.7;
 
-        .marquee-content {
-            display: flex;
-            white-space: nowrap;
-            animation: scroll-left 20s linear infinite; /* تثقيل السرعة إلى 25 ثانية */
-        }
+let ball = {
+    x: 200, y: 50, r: 10,
+    vx: 2, vy: 0,
+    color: "#00FFFF" // Neon Blue for Azraq2
+};
 
-        .marquee-item {
-            font-size: 14px; /* تصغير حجم الخط ليتناسب مع الارتفاع */
-            font-weight: bold;
-            padding: 0 50px;
-            color: #ffffff;
-            text-transform: uppercase;
-        }
+// Professional Flipper structure (Skeleton of the game)
+let leftFlipper = { x: 100, y: 550, width: 80, height: 15, angle: 0.2, active: false };
+let rightFlipper = { x: 220, y: 550, width: 80, height: 15, angle: -0.2, active: false };
 
-        @keyframes scroll-left {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
+function drawBall() {
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+    ctx.fillStyle = ball.color;
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = "#00FFFF";
+    ctx.fill();
+    ctx.closePath();
+    ctx.shadowBlur = 0; // Reset for performance
+}
 
-        /* 3. CLOCK & DATE SECTION */
-        .info-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 10px 0;
-            background: linear-gradient(180deg, #0a0a0a 0%, #000000 100%);
-        }
+function updatePhysics() {
+    // Apply Strategic Gravity
+    ball.vy += GRAVITY;
+    ball.x += ball.vx;
+    ball.y += ball.vy;
 
-        .clock-container {
-            width: 90px;
-            height: 90px;
-            border: 3px solid #ff0000;
-            border-radius: 50%;
-            position: relative;
-            background: #000;
-            box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
-            margin-bottom: 8px;
-        }
+    // Walls Collision
+    if (ball.x + ball.r > canvas.width || ball.x - ball.r < 0) {
+        ball.vx *= -1;
+    }
+    if (ball.y - ball.r < 0) {
+        ball.vy *= BOUNCE;
+    }
 
-        .clock-container::after {
-            content: '';
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: #ff0000;
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10;
-        }
+    // Reset if out of bounds (No annoying alerts)
+    if (ball.y > canvas.height) {
+        ball.y = 50;
+        ball.vy = 0;
+        ball.vx = (Math.random() - 0.5) * 4;
+    }
+}
 
-        .hand {
-            position: absolute;
-            bottom: 50%;
-            left: 50%;
-            transform-origin: bottom;
-            border-radius: 5px;
-        }
+function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    updatePhysics();
+    drawBall();
+    // Professional Tip: Add Bumpers and Flippers drawing logic here
+    requestAnimationFrame(render);
+}
 
-        .hour-hand { width: 4px; height: 25px; background: #ffffff; }
-        .min-hand { width: 3px; height: 35px; background: #cccccc; }
-        .sec-hand { width: 1.5px; height: 40px; background: #ff0000; }
-
-        .date-text {
-            font-size: 16px;
-            font-weight: bold;
-            color: #ff0000;
-            letter-spacing: 1px;
-        }
-
-        /* 4. HORIZONTAL STACKED BOXES */
-        .instructions-list {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            padding: 10px 15px;
-            overflow-y: auto;
-        }
-
-        .lang-card {
-            background: #0d0d0d;
-            border: 1px solid #330000;
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            box-shadow: inset 0 0 8px rgba(255, 0, 0, 0.05);
-        }
-
-        .lang-card:hover { border-color: #ff0000; }
-
-        .title {
-            color: #ff0000;
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 8px;
-            display: block;
-            text-decoration: underline;
-        }
-
-        .content {
-            font-size: 17px;
-            line-height: 1.4;
-            color: #ffffff;
-        }
-
-        .action-btn {
-            background: #ff0000;
-            color: white;
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-weight: bold;
-            margin-top: 8px;
-            font-size: 14px;
-        }
-
-        .ar { direction: rtl; }
-
-        /* Footer */
-        .footer {
-            height: 30px;
-            background: #050505;
-            text-align: center;
-            line-height: 30px;
-            font-size: 12px;
-            border-top: 1px solid #222;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="marquee-wrapper">
-        <div class="marquee-content">
-            <div class="marquee-item">Welcome / مَرحَبا - How To Use Our App / كَيفَ تَستعْملْ تطبِبقَنا</div>
-            <div class="marquee-item">Welcome / مَرحَبا - How To Use Our App / كَيفَ تَستعْملْ تطبِبقَنا</div>
-        </div>
-    </div>
-
-    <div class="info-section">
-        <div class="clock-container">
-            <div class="hand hour-hand" id="hour"></div>
-            <div class="hand min-hand" id="min"></div>
-            <div class="hand sec-hand" id="sec"></div>
-        </div>
-        <div class="date-text" id="date-display"></div>
-    </div>
-
-    <div class="instructions-list">
-        
-        <div class="lang-card">
-            <span class="title">ENGLISH</span>
-            <div class="content">On YouTube (Click 3 dots) • Settings • General • Appearance</div>
-            <div class="action-btn">Select DARK MODE</div>
-        </div>
-
-        <div class="lang-card">
-            <span class="title">FRANÇAIS</span>
-            <div class="content">Sur YouTube (Cliquer 3 Points) • Paramètres • Général • Apparence</div>
-            <div class="action-btn">MODE SOMBRE</div>
-        </div>
-
-        <div class="lang-card ar">
-            <span class="title">العربية</span>
-            <div class="content">يوتيوب (إضغط على 3 نقاط) • خِيار الإعداداَت • خِيار إعْدادات عَامة • خيَار المَظْهر</div>
-            <div class="action-btn">تفْعيل الوَضْع الدَاكِن</div>
-        </div>
-
-    </div>
-
-    <div class="footer">
-        Developed by TowMes©™ 
-    </div>
-
-    <script>
-        function runClock() {
-            const now = new Date();
-            const s = now.getSeconds() * 6;
-            const m = now.getMinutes() * 6;
-            const h = (now.getHours() % 12) * 30 + (m / 12);
-
-            document.getElementById('sec').style.transform = `rotate(${s}deg)`;
-            document.getElementById('min').style.transform = `rotate(${m}deg)`;
-            document.getElementById('hour').style.transform = `rotate(${h}deg)`;
-
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('date-display').innerText = now.toLocaleDateString('en-GB', options);
-        }
-        setInterval(runClock, 1000);
-        runClock();
-    </script>
-</body>
-</html>
+render();
