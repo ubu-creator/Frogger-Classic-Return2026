@@ -1,110 +1,87 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Azraq2 Pinball Pro - Developed by TowMes©™</title>
+    <title>Azraq2 - News Feed</title>
     <style>
-        body { margin: 0; background: #050505; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; font-family: 'Arial', sans-serif; overflow: hidden; }
-        canvas { background: #111; border: 4px solid #00d2ff; box-shadow: 0 0 20px #00d2ff; border-radius: 10px; }
-        .ui { position: absolute; top: 20px; left: 20px; font-size: 24px; text-shadow: 0 0 10px #00d2ff; }
+        body { background-color: #1a1a1a; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
+        
+        /* تصميم شريط الأخبار الاحترافي */
+        .ticker-container {
+            background-color: #8B0000;
+            color: #ffffff;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            border-bottom: 3px solid #5f0000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .ticker-text {
+            white-space: nowrap;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* تذييل الصفحة */
+        .footer {
+            position: fixed;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: #444;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body>
 
-<div class="ui">Score: <span id="score">0</span></div>
-<canvas id="pinballCanvas"></canvas>
+    <div class="ticker-container">
+        <marquee id="azraq-ticker" direction="right" scrollamount="7" loop="-1" onmouseover="this.stop();" onmouseout="this.start();">
+            جاري جلب الأخبار من المصادر المطلعة...
+        </marquee>
+    </div>
 
-<script>
-// Developed by TowMes©™ | Project: Azraq2
-const canvas = document.getElementById("pinballCanvas");
-const ctx = canvas.getContext("2d");
-const scoreElement = document.getElementById("score");
+    <div style="text-align: center; margin-top: 30vh;">
+        <h1 style="color: #8B0000; font-size: 4em; margin: 0; text-shadow: 3px 3px #000;">Azraq2</h1>
+        <p style="color: #666; font-size: 1.2em;">نظام جلب الأخبار الذكي</p>
+    </div>
 
-canvas.width = 450;
-canvas.height = 700;
+    <div class="footer">
+        Developed by TowMes©™ | ناصر الكود - ناصر 10
+    </div>
 
-// Strategic Physics Constants
-const GRAVITY = 0.25;
-const FRICTION = 0.98;
-let score = 0;
+    <script>
+        // المصدر الذي قدمته يا زورو 2
+        const rssSource = 'https://rss.app/feeds/1GBcT05q8x1bs7w5.xml';
+        // وسيط JSON لتحويل XML إلى بيانات مقروءة برمجياً
+        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssSource)}`;
 
-let ball = {
-    x: 225, y: 100, r: 12,
-    vx: 5, vy: 0,
-    color: "#00d2ff"
-};
-
-// Bumper Object (The Pure Unique Numbers for balance)
-let bumpers = [
-    {x: 150, y: 200, r: 35, color: "#ff0055"},
-    {x: 300, y: 200, r: 35, color: "#ff0055"},
-    {x: 225, y: 350, r: 40, color: "#ff0055"}
-];
-
-function drawBall() {
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
-    ctx.fillStyle = ball.color;
-    ctx.fill();
-    ctx.closePath();
-}
-
-function drawBumpers() {
-    bumpers.forEach(b => {
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-        ctx.strokeStyle = b.color;
-        ctx.lineWidth = 5;
-        ctx.stroke();
-        ctx.closePath();
-    });
-}
-
-function update() {
-    // 1. Apply Gravity (Professional Logic)
-    ball.vy += GRAVITY;
-    ball.x += ball.vx;
-    ball.y += ball.vy;
-
-    // 2. Wall Collisions
-    if (ball.x + ball.r > canvas.width || ball.x - ball.r < 0) {
-        ball.vx *= -0.8; 
-        ball.x = ball.x < ball.r ? ball.r : canvas.width - ball.r;
-    }
-    if (ball.y - ball.r < 0) ball.vy *= -0.8;
-
-    // 3. Bumper Collisions (Vector Physics)
-    bumpers.forEach(b => {
-        let dx = ball.x - b.x;
-        let dy = ball.y - b.y;
-        let distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < ball.r + b.r) {
-            // Realistic Bounce
-            let angle = Math.atan2(dy, dx);
-            ball.vx = Math.cos(angle) * 10;
-            ball.vy = Math.sin(angle) * 10;
-            score += 10;
-            scoreElement.innerText = score;
+        async function updateNews() {
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                if (data.status === 'ok') {
+                    let tickerHTML = "";
+                    data.items.forEach(item => {
+                        // دمج هويتك في كل خبر
+                        tickerHTML += ` <span style="color: #FFD700;">★</span> من مصادر مطلعة: ${item.title} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `;
+                    });
+                    // مضاعفة النص لضمان استمرارية الحركة دون انقطاع
+                    document.getElementById('azraq-ticker').innerHTML = tickerHTML + tickerHTML;
+                }
+            } catch (error) {
+                document.getElementById('azraq-ticker').innerHTML = "🔴 ناصر الكود: فشل الاتصال بالمصدر، يرجى التحقق من الرابط.";
+            }
         }
-    });
 
-    // 4. Reset Ball (No Shawa'ib/Alerts)
-    if (ball.y > canvas.height) {
-        ball.y = 50; ball.vy = 0; ball.vx = (Math.random() - 0.5) * 10;
-    }
-}
+        // تنفيذ الجلب عند التحميل
+        updateNews();
+        // تحديث الأخبار تلقائياً كل 10 دقائق دون الحاجة لإعادة تحميل الصفحة
+        setInterval(updateNews, 600000);
+    </script>
 
-function loop() {
-    ctx.fillStyle = "rgba(10, 10, 10, 0.3)"; // Trail effect
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    drawBumpers();
-    drawBall();
-    update();
-    requestAnimationFrame(loop);
-}
-
-loop();
-</script>
 </body>
 </html>
